@@ -27,6 +27,8 @@ class Ppdf{
         //add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets' ) );
         add_action( 'wp_ajax_ppdf_post_details', array($this,'post_details'));
         add_action( 'wp_ajax_nopriv_ppdf_post_details', array($this,'post_details'));
+        add_filter ('theme_page_templates', [$this,'ppdf_add_page_template']);
+        add_filter ('page_template', [$this,'ppdf_redirect_page_template']);
     }
     /*
     public function ppdf_plugin_init(){
@@ -93,10 +95,37 @@ class Ppdf{
                     'thumbnail'=>$post_thumb,
                 );
             }
-            echo json_encode($postDetails,JSON_PRETTY_PRINT);
-            die();
+            //echo json_encode($postDetails,JSON_UNESCAPED_SLASHES);
+            //$data= json_encode($postDetails,JSON_PRETTY_PRINT);
+            
+            $return = array(
+                'message' => __( 'Post Info picked', 'ppdf' ),
+                'data'      => $postDetails
+            );
+            wp_send_json( $return );
+            
+            //die();
         }
     }
+    /**
+     * Load Template with Plugin
+     */
+
+    function ppdf_add_page_template ($templates) {
+        $templates['generate-pdf.php'] = 'Set This To Generate pdf';
+        return $templates;
+    }
+
+    function ppdf_redirect_page_template ($template) {
+        $post = get_post();
+        $page_template = get_post_meta( $post->ID, '_wp_page_template', true );
+        if ('generate-pdf.php' == basename ($page_template)) {
+            $template = WP_PLUGIN_DIR . '/post-pdf/generate-pdf.php';
+            return $template;
+        }
+    }
+
+
 }
 
 new Ppdf();

@@ -10,22 +10,34 @@
 
 function ppdf_ajax_call() {
     let $ = jQuery;
-    $.post(ppdfdata.ajax_url, { 'action': 'ppdf_post_details', 'data': ppdfdata.pid }, function (data) {
-        //console.log(data);
+    $.post(ppdfdata.ajax_url, { 'action': 'ppdf_post_details', 'data': ppdfdata.pid }, function (response) {
+        //console.log(response.data.title,response.data.content);
+        
+		//var targetUrl = ppdfdata.site_url+'/generate-pdf/'+'?title='+response.data.title+'&content='+response.data.content; //generate-pdf is a wp page.
+        //console.log(targetUrl);
+		//using for get method via url parameter 
+		//window.open(targetUrl, "_blank");
+        
+		var targetUrl = ppdfdata.site_url+'/generate-pdf';
+
         $.ajax({
-            url : ppdfdata.root_utl+"generate-pdf.php" ,
-            type : 'POST',
-            contentType:'application/json',
-            dataType:'json',
-            data : JSON.stringify(data),
-            success : function(res) {
-                    // Successfully sent data
-                  console.log(res);
+            url : targetUrl,
+            type : 'post',
+            //contentType:"application/json; charset=utf-8",
+           // dataType:'json',
+            //data: JSON.stringify(response),
+            //async: false,
+			data: {title:response.data.title,content:response.data.content},
+			success : function(data) {
+				window.open(targetUrl, "_blank");
+              	console.log("Successfully sent data");
             },
             error: function(err) {
                 // Unable to send data
-                  console.log(err);
+                  console.log("operation failed");
             }
         });
+        
+
     });
 }
